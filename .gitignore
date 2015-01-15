@@ -2,6 +2,11 @@
 /*
 /*/
 
+# Inverse ignore some stuff
+!/Assets/
+!/ProjectSettings/
+!.gitignore
+
 # OS Stuff
 .DS_Store
 ._*
@@ -11,8 +16,3 @@ ehthumbs.db
 Thumbs.db
 $RECYCLE.BIN/
 Desktop.ini
-
-# Inverse ignore some stuff
-!/Assets/
-!/ProjectSettings/
-!.gitignore

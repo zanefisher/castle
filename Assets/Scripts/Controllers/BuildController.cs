@@ -85,6 +85,7 @@ public class BuildController : MonoBehaviour {
 	//public GameObject tower;
 	//public Transform gunObj;
 	GameObject prevWall;
+	public LayerMask wallLayerMask;
 	IEnumerator BuildWall(Vector3 startPos, Vector3 endPos){
 		
 		Vector3 buildDirection=endPos-startPos;
@@ -100,12 +101,14 @@ public class BuildController : MonoBehaviour {
 			RaycastHit rayHit;
 			GameObject wall =Instantiate(wallChunk,currentBuildPos+Vector3.up*5f,Quaternion.LookRotation(buildDirection)) as GameObject;
 			
-			if (Physics.Raycast(wall.transform.position, Vector3.down, out rayHit) || Physics.Raycast(wall.transform.position, Vector3.up, out rayHit)){
-				Debug.Log("hit");
-				
-				wall.transform.position=new Vector3(rayHit.point.x,rayHit.point.y+wallOffsetHeight,rayHit.point.z);
-				
-				wall.transform.rotation = Quaternion.LookRotation((lastWallPos-wall.transform.position),rayHit.normal);
+			if (Physics.Raycast(wall.transform.position, Vector3.down, out rayHit, wallLayerMask) || Physics.Raycast(wall.transform.position, Vector3.up, out rayHit, wallLayerMask)){
+				//if(rayHit.transform.gameObject.tag != "Tower"){
+					Debug.Log("hit");
+					
+					wall.transform.position=new Vector3(rayHit.point.x,rayHit.point.y+wallOffsetHeight,rayHit.point.z);
+					
+					wall.transform.rotation = Quaternion.LookRotation((lastWallPos-wall.transform.position),rayHit.normal);
+				//}
 				
 				
 				//wall.GetComponent<BuildEffect>().Build(wallOffsetHeight);

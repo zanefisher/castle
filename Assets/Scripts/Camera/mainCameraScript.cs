@@ -4,10 +4,19 @@ using System.Collections;
 public class mainCameraScript : MonoBehaviour {
 
 	public float panSpeed;
+	public float zoomSpeed;
+	bool cannotMoveCamera;
 
 	void Update () {
-		HandleEdgePanning ();
-		HandleZoom ();
+		if (!cannotMoveCamera) {
+			HandleEdgePanning ();
+			HandleZoom ();
+		}
+		if (Input.GetKeyDown (KeyCode.Space)) {
+			Debug.Log (viewToWorldLeft ().x);
+			Debug.Log (viewToWorldRight ().x);
+		}
+		//HandleSnapping ();
 	}
 
 	void HandleEdgePanning (){
@@ -33,7 +42,89 @@ public class mainCameraScript : MonoBehaviour {
 			Camera.main.orthographicSize = Mathf.Clamp (Camera.main.orthographicSize, 2f, 7.5f);
 		} else {
 			transform.Translate (0f, 0f, -mouseWheelMovement);
-			transform.position = new Vector3 (transform.position.x, Mathf.Clamp (transform.position.y, 5, 20), transform.position.z);
+			//transform.position = new Vector3 (transform.position.x, Mathf.Clamp (transform.position.y, 5, 20), transform.position.z);
 		}
 	}
+
+	/*public bool finishedSnapping;
+	public Vector3 snapPosition;
+	void HandleSnapping(){
+		if(!finishedSnapping)
+	}*/
+	Vector3 viewToWorldRight(){
+		return Camera.main.ViewportToWorldPoint(new Vector3(1, 0.5f, Camera.main.nearClipPlane));
+	}
+	Vector3 viewToWorldLeft(){
+		return Camera.main.ViewportToWorldPoint (new Vector3(0, 0.5f, Camera.main.nearClipPlane));
+	}
+
+	public Transform baseTransform;
+	public void SnapToPosition(GameObject target){
+		float halfFOV = Camera.main.fieldOfView * 0.5f;
+		float angleFromGround = 90f - halfFOV;
+		float halfDistance = Vector3.Distance (target.transform.position, baseTransform.position) / 2f;
+		Vector3 midPoint = ((target.transform.position - baseTransform.position) / 2f) + baseTransform.position;
+		float direction = Vector3.Angle (target.transform.position, baseTransform.position);
+		Debug.Log (direction);
+		//float height = halfDistance / (Mathf.Tan (halfFOV));
+		float height = halfDistance * Mathf.Tan (angleFromGround);
+		Vector3 snapPos = new Vector3 (midPoint.x, height * 4f, midPoint.z);
+		//transform.position = snapPos;
+		StartCoroutine (LerpToPos (snapPos));
+	}
+
+	IEnumerator LerpToPos(Vector3 snapPos){
+		iTween.MoveTo (gameObject, snapPos, 1f);
+		yield return null;
+	}
+
+	//JANKY LERPING
+	/*public void SnapToPosition(GameObject target){
+		Vector3 snapPos = (target.transform.position /2f);
+		transform.position = new Vector3 (snapPos.x, transform.position.y, snapPos.z);
+		if (target.transform.position.x < viewToWorldLeft ().x) {
+			Debug.Log ("left");
+			StartCoroutine (ZoomOut(target));
+		}
+	}
+
+	IEnumerator ZoomOut(GameObject target){
+		Debug.Log ("zooming");
+		while (target.transform.position.x < viewToWorldLeft().x) {
+			cannotMoveCamera = true;
+			if(Camera.main.orthographic){
+				GetComponent<Camera>().orthographicSize += Time.deltaTime * zoomSpeed;
+			}else{
+				transform.position += Vector3.up * Time.deltaTime * zoomSpeed;
+			}
+			yield return null;
+		}
+		Debug.Log ("done zooming");
+		cannotMoveCamera = false;
+		yield return null;
+	}*/
+
+
+	//USING ITWEEN
+	/*public void SnapToPosition(GameObject target){
+		Vector3 snapPos = (target.transform.position /2f);
+		StartCoroutine (LerpToPos(target, snapPos));
+	}
+
+	IEnumerator LerpToPos(GameObject target, Vector3 snapPos){
+		iTween.MoveTo (gameObject, new Vector3(snapPos.x, transform.position.y, snapPos.z), 1f);
+		while (transform.position != snapPos) {
+			cannotMoveCamera = true;
+			transform.position = Vector3.Lerp (transform.position, new Vector3 (snapPos.x, transform.position.y, snapPos.z), Time.deltaTime * panSpeed);
+			yield return null;
+		}
+		if (target.transform.position.x < viewToWorldLeft ().x) {
+			Debug.Log ("left");
+			//StartCoroutine (ZoomOut(target));
+		} else {
+			Debug.Log ("fine");
+		}
+		cannotMoveCamera = false;
+		yield return null;
+	}*/
 }

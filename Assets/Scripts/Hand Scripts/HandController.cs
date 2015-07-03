@@ -11,7 +11,7 @@ public class HandController : MonoBehaviour {
 		}
 	}
 
-	public void ThrowUnit(Vector3 target, int unitAmount){
+	/*public void ThrowUnit(Vector3 target, int unitAmount){
 		//Get a unit (or multiple units) from the list of idle units.
 		//If you are trying to throw more than you have, just throw everything you have
 		if (unitAmount > UnitController.idleUnits.Count) {
@@ -28,6 +28,18 @@ public class HandController : MonoBehaviour {
 			throwPath [3] = target;
 			iTween.MoveTo (newAttackingUnit, iTween.Hash ("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad)); 
 		}
-	}
+	}*/
 
+	public void ThrowUnit(Vector3 target){
+		for (int i = 0; i < UnitController.throwingPrepUnits.Count; i++) {
+			GameObject newAttackingUnit = UnitController.throwingPrepUnits [i];
+			Vector3 midPoint = (((target - transform.position) * 0.5f) + transform.position) + Vector3.up * 5f;
+			Vector3[] throwPath = new Vector3[]{Vector3.zero,Vector3.zero,Vector3.zero};
+			throwPath [0] = transform.position;
+			throwPath [1] = midPoint;
+			throwPath [2] = target;
+			iTween.MoveTo (newAttackingUnit, iTween.Hash ("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad)); 
+		}
+		UnitController.throwingPrepUnits.Clear ();
+	}
 }

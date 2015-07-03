@@ -58,6 +58,7 @@ public class mainCameraScript : MonoBehaviour {
 		return Camera.main.ViewportToWorldPoint (new Vector3(0, 0.5f, Camera.main.nearClipPlane));
 	}
 
+	//TRYING TO USE TRIG. THIS IS THE BEST SO FAR, BUT SUCKS IF THE TARGET IS TOO CLOSE TO THE BASE
 	public Transform baseTransform;
 	public void SnapToPosition(GameObject target){
 		float halfFOV = Camera.main.fieldOfView * 0.5f;
@@ -77,6 +78,7 @@ public class mainCameraScript : MonoBehaviour {
 		iTween.MoveTo (gameObject, snapPos, 1f);
 		yield return null;
 	}
+
 
 	//JANKY LERPING
 	/*public void SnapToPosition(GameObject target){
@@ -102,6 +104,29 @@ public class mainCameraScript : MonoBehaviour {
 		Debug.Log ("done zooming");
 		cannotMoveCamera = false;
 		yield return null;
+	}*/
+
+
+	/*public void SnapToPosition(GameObject target){
+		Vector3 midPoint = ((target.transform.position - baseTransform.position) / 2f) + baseTransform.position;
+		Vector3 snapPos = new Vector3 (midPoint.x, transform.position.y + 5f, midPoint.z);
+		StartCoroutine (LerpToPos (target, snapPos));
+	}
+
+	IEnumerator LerpToPos(GameObject target, Vector3 snapPos){
+		iTween.MoveTo (gameObject, iTween.Hash ("position", snapPos, "time", 1f, "oncomplete", "ZoomInOrOut", "oncompleteparams", target));
+
+		yield return null;
+	}
+
+	void ZoomInOrOut(GameObject target){
+		if (target.transform.position.x < viewToWorldLeft().x) {
+			Debug.Log ("left");
+		} else if (target.transform.position.x > viewToWorldRight().x) {
+			Debug.Log ("right");
+		} else {
+			Debug.Log ("on screen");
+		}
 	}*/
 
 

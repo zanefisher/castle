@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class attackMenu : MonoBehaviour {
 
 	public GameObject flingMenu;
 	public GameObject unitPrefab;
+	public GameObject markerPrefab;
+	public GameObject markerObjectPrefab;
 	public Transform basePosition;
 	
 	void Update () {
@@ -31,26 +34,44 @@ public class attackMenu : MonoBehaviour {
 		}
 	}
 
-	GameObject newAttackingUnit;
-	public void SpawnUnit(){
-		Debug.Log ("Spawning");
-		newAttackingUnit = Instantiate (unitPrefab, mousePos(), Quaternion.identity) as GameObject;
+	GameObject newMarker;
+	public float unitTimer;
+	public void SpawnMarker(){
+		//This is working, but spits out an error because the last newMarker was destroyed. Don't know if this can cause problems.
+		newMarker = Instantiate (markerPrefab, Input.mousePosition, Quaternion.identity) as GameObject;
+		newMarker.transform.parent = this.transform;
+		unitTimer = 0f;
 	}
 
-	public void DragUnit(){
-		Debug.Log ("dragging");
-		newAttackingUnit.transform.position = mousePos();
+	public void DragMarker(){
+		newMarker.transform.position = Input.mousePosition;
+		//While the mouse is down (i.e. the marker is being dragged) increase a timer that determines how many units are thrown (within reason)
+		unitTimer += Time.deltaTime;
+		int unitAmt = Mathf.RoundToInt (unitTimer + 0.5f);
+		if (unitAmt <= UnitController.idleUnits.Count) {
+			newMarker.GetComponentInChildren<Text> ().text = unitAmt.ToString ();
+		} else {
+			newMarker.GetComponentInChildren<Text> ().text = UnitController.idleUnits.Count.ToString ();
+		}
 	}
-	public Vector3[] flingPath;
-	public void FlingUnit(){
-		Debug.Log ("flinging");
-		Vector3 midPoint = ((EnemyController.selectedEnemyGroup.transform.position - basePosition.position) / 2f) + basePosition.position;
-		Vector3 pathMidPoint = new Vector3(midPoint.x, midPoint.y + 5f, midPoint.z);
-		//Vector3[] flingPath = new Vector3[basePosition.position, pathMidPoint, EnemyController.selectedEnemyGroup.gameObject.transform.position];
-		flingPath [0] = basePosition.position;
-		flingPath [1] = pathMidPoint;
-		flingPath [2] = EnemyController.selectedEnemyGroup.transform.position;
-		newAttackingUnit.transform.position = basePosition.position;
-		iTween.MoveTo (newAttackingUnit, iTween.Hash ("path", flingPath, "time", 2f, "easetype", iTween.EaseType.easeInBack));
+
+	GameObject newMarkerObject;
+	public void FlingMarker(Vector3 pointerPos){
+		int unitAmount = Mathf.RoundToInt (unitTimer + 0.5f);
+		//Delete the UI Marker
+		Destroy (newMarker);
+		//Spawn a marker GameObject
+		newMarkerObject = Instantiate (markerObjectPrefab, mousePos(), Quaternion.identity) as GameObject;
+		//Send a marker from the pointer to the target
+		StartCoroutine ("markerTween", unitAmount);
+	}
+
+	IEnumerator markerTween(int unitAmount){
+		Vector3 destination = EnemyController.selectedEnemyGroup.transform.position;
+		iTween.MoveTo (newMarkerObject, iTween.Hash ("position", destination, "time", 1f));
+		//yield return new WaitForSeconds (1f);
+		//Have the hand grab a unit and throw it to the marker
+		GameObject.Find ("Base").GetComponent<HandController> ().ThrowUnit (destination, unitAmount);
+		yield return null;
 	}
 }

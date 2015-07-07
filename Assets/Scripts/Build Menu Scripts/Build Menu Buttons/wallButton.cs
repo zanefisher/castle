@@ -11,7 +11,7 @@ public class wallButton : MonoBehaviour {
 	public BuildController buildController;
 
 	void Start(){
-		//buildController = GameObject.Find ("BuildController").GetComponent<BuildController> ();
+		buildController = GameObject.Find ("BuildController").GetComponent<BuildController> ();
 	}
 
 	void Update(){

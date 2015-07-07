@@ -6,11 +6,15 @@ public class UnitController : MonoBehaviour {
 
 	public static List<GameObject> totalUnits;
 	public static List<GameObject> idleUnits;
+	public static List<GameObject> attackThrowingPrepUnits;
+	public static List<GameObject> wallThrowingPrepUnits;
 
 	// Use this for initialization
 	void Start () {
 		totalUnits = new List<GameObject> ();
 		idleUnits = new List<GameObject> ();
+		attackThrowingPrepUnits = new List<GameObject> ();
+		wallThrowingPrepUnits = new List<GameObject> ();
 	}
 	
 	// Update is called once per frame

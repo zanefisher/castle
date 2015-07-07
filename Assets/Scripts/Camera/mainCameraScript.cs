@@ -21,16 +21,16 @@ public class mainCameraScript : MonoBehaviour {
 
 	void HandleEdgePanning (){
 		//if (Input.mousePosition.x > Screen.width * 0.9f) {
-		if (Input.GetKey (KeyCode.D)) {
+		if (Input.GetKey (KeyCode.RightArrow)) {
 			transform.Translate (panSpeed * Time.deltaTime, 0f, 0f);
 			//}else if(Input.mousePosition.x < Screen.width * 0.1f) {
-		}else if(Input.GetKey (KeyCode.A)){
+		}else if(Input.GetKey (KeyCode.LeftArrow)){
 			transform.Translate (-panSpeed * Time.deltaTime, 0f, 0f);
 		//}else if(Input.mousePosition.y > Screen.height * 0.9f) {
-		}else if(Input.GetKey (KeyCode.W)){
+		}else if(Input.GetKey (KeyCode.UpArrow)){
 			transform.Translate (0f, panSpeed * Time.deltaTime, 0f);
 		//}else if(Input.mousePosition.y < Screen.height * 0.1f) {
-		}else if(Input.GetKey (KeyCode.S)){
+		}else if(Input.GetKey (KeyCode.DownArrow)){
 			transform.Translate (0f, -panSpeed * Time.deltaTime, 0f);
 		}
 	}

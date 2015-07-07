@@ -23,8 +23,10 @@ public class flingMenu : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 			isSelectable = true;
 			GetComponent<Image>().color = Color.white;
 		} else {
-			isSelectable = false;
-			GetComponent<Image>().color = Color.gray;
+			if(attackController.isThrowing == false){
+				isSelectable = false;
+				GetComponent<Image>().color = Color.gray;
+			}
 		}
 	}
 

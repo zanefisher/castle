@@ -13,7 +13,15 @@ public class wallButton : MonoBehaviour {
 	void Start(){
 		//buildController = GameObject.Find ("BuildController").GetComponent<BuildController> ();
 	}
-	
+
+	void Update(){
+		//Hotkey (yes, it does overlap with movement)
+		if(Input.GetKeyDown (KeyCode.W)){
+			SpawnWall();
+		}
+	}
+
+
 	public void SpawnWall(){
 		Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 		

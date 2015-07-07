@@ -1,11 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class BuildController : MonoBehaviour {
 
 	Vector3 mousePos;
 	public GameObject start;
 	public GameObject end;
+	HandController handController;
+	public List<GameObject> wallSegmentList;
+
+	void Start(){
+		//handController = GameObject.Find ("Base").GetComponent<HandController>();
+		handController = GameObject.FindObjectOfType<HandController>().GetComponent<HandController>();
+		wallSegmentList = new List<GameObject>();
+	}
 
 	void Update () {
 		GetMousePos ();
@@ -17,12 +26,14 @@ public class BuildController : MonoBehaviour {
 	public bool connectingTowers;
 	public GameObject targetTower;
 	GameObject newWall;
-	public GameObject wallPrefab;
+	public GameObject wallTemplatePrefab;
 	public GameObject startTower;
 	GameObject endTower;
 	public GameObject endTowerPrefab;
 	float wallLength;
 	float distance;
+	float unitsRequired;
+	bool notEnoughUnits;
 	void HandleBuildingWalls (){
 		if (buildingWalls){
 			if(Input.GetMouseButtonDown (0)){
@@ -30,13 +41,24 @@ public class BuildController : MonoBehaviour {
 				Destroy (startTower.GetComponent<stickToMouse>());
 				//Destroy(newWall.gameObject.GetComponent<stickToMouse>());
 				//Destroy (endTower.GetComponent<stickToMouse>());
-				newWall = Instantiate (wallPrefab, mousePos, Quaternion.identity) as GameObject;
+				newWall = Instantiate (wallTemplatePrefab, mousePos, Quaternion.identity) as GameObject;
 				endTower = Instantiate (endTowerPrefab, mousePos, Quaternion.identity) as GameObject;
 			}else if(Input.GetMouseButtonUp (0)){
-				endTower.transform.position = startTower.transform.position + distance * startTower.transform.forward;
-				Destroy (newWall);
-				StartCoroutine (BuildWall (startTower.transform.position, endTower.transform.position));
-				buildingWalls = false;
+				if(!notEnoughUnits){
+					for(int i = 0; i <= unitsRequired; i++){
+						UnitController.wallThrowingPrepUnits.Add (UnitController.idleUnits[0]);
+						UnitController.idleUnits.Remove (UnitController.idleUnits[0]);
+					}
+					endTower.transform.position = startTower.transform.position + distance * startTower.transform.forward;
+					Destroy (newWall);
+					StartCoroutine (BuildWall (startTower.transform.position, endTower.transform.position));
+					buildingWalls = false;
+				}else{
+					Destroy (startTower);
+					Destroy (endTower);
+					Destroy (newWall);
+					buildingWalls = false;
+				}
 			}else if(Input.GetMouseButton (0)){
 				//end.transform.position = mousePos;
 				if(connectingTowers){
@@ -51,6 +73,14 @@ public class BuildController : MonoBehaviour {
 				newWall.transform.position = startTower.transform.position + distance/2 * startTower.transform.forward;
 				newWall.transform.rotation = startTower.transform.rotation;
 				newWall.transform.localScale = new Vector3(newWall.transform.localScale.x, newWall.transform.localScale.y, wallLength);
+				unitsRequired = wallLength / stepSize;
+				if(unitsRequired > UnitController.idleUnits.Count){
+					notEnoughUnits = true;
+					newWall.GetComponent<MeshRenderer>().material.color = Color.red;
+				}else{
+					notEnoughUnits = false;
+					newWall.GetComponent<MeshRenderer>().material.color = Color.white;
+				}
 			}else{
 				if(connectingTowers){
 					startTower.transform.position = targetTower.transform.position;
@@ -100,10 +130,10 @@ public class BuildController : MonoBehaviour {
 			Ray theRay;
 			RaycastHit rayHit;
 			GameObject wall =Instantiate(wallChunk,currentBuildPos+Vector3.up*5f,Quaternion.LookRotation(buildDirection)) as GameObject;
-			
+			wall.GetComponent<Renderer>().enabled = false;
+			wall.GetComponent<BoxCollider>().enabled = false;
 			if (Physics.Raycast(wall.transform.position, Vector3.down, out rayHit, wallLayerMask) || Physics.Raycast(wall.transform.position, Vector3.up, out rayHit, wallLayerMask)){
 				//if(rayHit.transform.gameObject.tag != "Tower"){
-					Debug.Log("hit");
 					
 					wall.transform.position=new Vector3(rayHit.point.x,rayHit.point.y+wallOffsetHeight,rayHit.point.z);
 					
@@ -127,11 +157,14 @@ public class BuildController : MonoBehaviour {
 			currentBuildPos+=buildDirection.normalized*stepSize;
 			lastWallPos=wall.transform.position;
 			prevWall=wall;
-			
+
+			wallSegmentList.Add(wall);
 			i++;
 			yield return new WaitForSeconds(stepDelay);
 		}
 		prevWall=null;
+		handController.ThrowUnitToWall(wallSegmentList);
+		//wallSegmentList.Clear ();
 		yield break;
 	}
 

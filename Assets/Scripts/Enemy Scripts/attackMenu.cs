@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
@@ -54,12 +54,12 @@ public class attackMenu : MonoBehaviour {
 		int unitAmt = Mathf.RoundToInt (unitTimer + 0.5f);
 		if (unitAmtPrev < unitAmt && UnitController.idleUnits.Count > 0) {
 			GameObject newThrowingPrepUnit = UnitController.idleUnits[0];
-			UnitController.throwingPrepUnits.Add (newThrowingPrepUnit);
+			UnitController.attackThrowingPrepUnits.Add (newThrowingPrepUnit);
 			UnitController.idleUnits.Remove (newThrowingPrepUnit);
 			iTween.MoveTo (newThrowingPrepUnit, basePosition.position, 1f);
 			unitAmtPrev = unitAmt;
 		}
-		newMarker.GetComponentInChildren<Text> ().text = UnitController.throwingPrepUnits.Count.ToString ();
+		newMarker.GetComponentInChildren<Text> ().text = UnitController.attackThrowingPrepUnits.Count.ToString ();
 		/*if (unitAmt <= UnitController.idleUnits.Count) {
 			newMarker.GetComponentInChildren<Text> ().text = unitAmt.ToString ();
 		} else {
@@ -84,7 +84,7 @@ public class attackMenu : MonoBehaviour {
 		iTween.MoveTo (newMarkerObject, iTween.Hash ("position", destination, "time", 1f));
 		//yield return new WaitForSeconds (1f);
 		//Have the hand grab a unit and throw it to the marker
-		GameObject.Find ("Base").GetComponent<HandController> ().ThrowUnit (destination/*, unitAmount*/);
+		GameObject.Find ("Base").GetComponent<HandController> ().ThrowUnitToEnemy (destination/*, unitAmount*/);
 		yield return null;
 	}
 }

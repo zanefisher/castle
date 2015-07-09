@@ -34,6 +34,7 @@ public class BuildController : MonoBehaviour {
 	float distance;
 	float unitsRequired;
 	bool notEnoughUnits;
+     
 	void HandleBuildingWalls (){
 		if (buildingWalls){
 			if(Input.GetMouseButtonDown (0)){
@@ -51,7 +52,7 @@ public class BuildController : MonoBehaviour {
 					}
 					endTower.transform.position = startTower.transform.position + distance * startTower.transform.forward;
 					Destroy (newWall);
-					StartCoroutine (BuildWall (startTower.transform.position, endTower.transform.position));
+					StartCoroutine (BuildWall (startTower,endTower));
 					buildingWalls = false;
 				}else{
 					Destroy (startTower);
@@ -59,7 +60,7 @@ public class BuildController : MonoBehaviour {
 					Destroy (newWall);
 					buildingWalls = false;
 				}
-			}else if(Input.GetMouseButton (0)){
+			} else if(Input.GetMouseButton (0)){
 				//end.transform.position = mousePos;
 				if(connectingTowers){
 					endTower.transform.position = targetTower.transform.position;
@@ -116,11 +117,23 @@ public class BuildController : MonoBehaviour {
 	//public Transform gunObj;
 	GameObject prevWall;
 	public LayerMask wallLayerMask;
-	IEnumerator BuildWall(Vector3 startPos, Vector3 endPos){
+
+	IEnumerator BuildWall(GameObject startTower, GameObject endTower){
+
+        Wall newWall = (new GameObject()).AddComponent<Wall>();
+        newWall.name = "Wall";
+
+        newWall.SetTowers(startTower.GetComponent<WallTower>(), endTower.GetComponent<WallTower>());
+
+        Vector3 startPos = startTower.transform.position;
+        Vector3 endPos = endTower.transform.position;
 		
-		Vector3 buildDirection=endPos-startPos;
+        
+        Vector3 buildDirection=endPos-startPos;
 		Vector3 currentBuildPos=startPos;
-		Vector3 lastWallPos=startPos;
+		Vector3 lastChunkPos=startPos;
+
+
 		
 		
 		wallSegments=Vector3.Distance(startPos,endPos)/stepSize;
@@ -129,15 +142,18 @@ public class BuildController : MonoBehaviour {
 			
 			Ray theRay;
 			RaycastHit rayHit;
-			GameObject wall =Instantiate(wallChunk,currentBuildPos+Vector3.up*5f,Quaternion.LookRotation(buildDirection)) as GameObject;
-			wall.GetComponent<Renderer>().enabled = false;
-			wall.GetComponent<BoxCollider>().enabled = false;
-			if (Physics.Raycast(wall.transform.position, Vector3.down, out rayHit, wallLayerMask) || Physics.Raycast(wall.transform.position, Vector3.up, out rayHit, wallLayerMask)){
+			GameObject chunk =Instantiate(wallChunk,currentBuildPos+Vector3.up*5f,Quaternion.LookRotation(buildDirection)) as GameObject;
+
+            newWall.AddChunk(chunk.GetComponent<WallChunk>());
+
+			chunk.GetComponent<Renderer>().enabled = false;
+			chunk.GetComponent<BoxCollider>().enabled = false;
+			if (Physics.Raycast(chunk.transform.position, Vector3.down, out rayHit, wallLayerMask) || Physics.Raycast(chunk.transform.position, Vector3.up, out rayHit, wallLayerMask)){
 				//if(rayHit.transform.gameObject.tag != "Tower"){
 					
-					wall.transform.position=new Vector3(rayHit.point.x,rayHit.point.y+wallOffsetHeight,rayHit.point.z);
+					chunk.transform.position=new Vector3(rayHit.point.x,rayHit.point.y+wallOffsetHeight,rayHit.point.z);
 					
-					wall.transform.rotation = Quaternion.LookRotation((lastWallPos-wall.transform.position),rayHit.normal);
+					chunk.transform.rotation = Quaternion.LookRotation((lastChunkPos-chunk.transform.position),rayHit.normal);
 				//}
 				
 				
@@ -146,19 +162,19 @@ public class BuildController : MonoBehaviour {
 				//wall.transform.rotation=Quaternion.FromToRotation(Vector3.up, rayHit.normal);
 			}
 			
-			Vector3 wallScale=wall.transform.localScale;
+			Vector3 wallScale=chunk.transform.localScale;
 			wallScale.z=stepSize;
-			wall.transform.localScale=wallScale;
+			chunk.transform.localScale=wallScale;
 			
 			if(prevWall!=null){
-				ReshapeCubes(wall,prevWall);
+				ReshapeCubes(chunk,prevWall);
 			}
 			
 			currentBuildPos+=buildDirection.normalized*stepSize;
-			lastWallPos=wall.transform.position;
-			prevWall=wall;
+			lastChunkPos=chunk.transform.position;
+			prevWall=chunk;
 
-			wallSegmentList.Add(wall);
+			wallSegmentList.Add(chunk);
 			i++;
 			yield return new WaitForSeconds(stepDelay);
 		}

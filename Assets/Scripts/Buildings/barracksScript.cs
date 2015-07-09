@@ -30,7 +30,17 @@ public class barracksScript : MonoBehaviour {
 	}
 
 	void SpawnUnit(){
-		GameObject newUnit = Instantiate (unitPrefab, new Vector3(transform.position.x, transform.position.y + transform.localScale.y / 2, transform.position.z), Quaternion.identity) as GameObject;
+		GameObject newUnit = Instantiate (unitPrefab, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity) as GameObject;
+        Unit u = newUnit.GetComponent<Unit>();
+
+        Vector3 goal = new Vector3();
+
+        goal = GameObject.FindObjectOfType<HandController>().transform.position;
+
+        Vector2 iuc = Random.insideUnitCircle * 5f;
+
+        goal += new Vector3(iuc.x, 0, iuc.y);
+        u.SetGoal(goal);
 	}
 
 	void HandleBuilding(){

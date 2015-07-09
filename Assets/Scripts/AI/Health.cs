@@ -5,9 +5,9 @@ using System.Collections.Generic;
 public class Health : MonoBehaviour {
 
     protected static List<string> _damageTypes = new List<string>() { "normal", "fire", "explode" };
-    public int health;
+    protected int health;
 
-    public void dealDamage(int amount, string type)
+    public virtual void dealDamage(int amount, string type)
     {
         this.OnDamage(amount, type);
     }

@@ -6,6 +6,8 @@ public class HandController : MonoBehaviour {
 
 	BuildController buildController;
 
+    public float grabRange = 5f;
+
 	void Start(){
 		buildController = GameObject.Find ("BuildController").GetComponent<BuildController>();
 	}

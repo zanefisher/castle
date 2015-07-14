@@ -4,10 +4,12 @@ using System.Collections.Generic;
 
 public class UnitController : MonoBehaviour {
 
-	public static List<GameObject> totalUnits;
-	public static List<GameObject> idleUnits;
-	public static List<GameObject> attackThrowingPrepUnits;
-	public static List<GameObject> wallThrowingPrepUnits;
+	public static List<GameObject> totalUnits = new List<GameObject>();
+	public static List<GameObject> idleUnits = new List<GameObject>();
+
+
+	public static List<GameObject> attackThrowingPrepUnits = new List<GameObject>();
+	public static List<GameObject> wallThrowingPrepUnits = new List<GameObject>();
 
 	// Use this for initialization
 	void Start () {

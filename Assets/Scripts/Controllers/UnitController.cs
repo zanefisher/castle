@@ -6,8 +6,6 @@ public class UnitController : MonoBehaviour {
 
 	public static List<GameObject> totalUnits = new List<GameObject>();
 	public static List<GameObject> idleUnits = new List<GameObject>();
-
-
 	public static List<GameObject> attackThrowingPrepUnits = new List<GameObject>();
 	public static List<GameObject> wallThrowingPrepUnits = new List<GameObject>();
 
@@ -27,4 +25,12 @@ public class UnitController : MonoBehaviour {
 			totalUnits[randUnitNum].GetComponent<unitScript>().DestroyUnit();
 		}
 	}
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag.Equals("FriendlyUnit"))
+        {
+            idleUnits.Add(other.gameObject);
+        }
+    }
 }

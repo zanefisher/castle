@@ -34,6 +34,7 @@ public class Building : MonoBehaviour {
         this._renderer = this.GetComponent<MeshRenderer>();
         this._originalColor = this._renderer.material.color;
 	}
+
 	
 	// Update is called once per frame
 	void Update () {
@@ -89,9 +90,9 @@ public class Building : MonoBehaviour {
     protected virtual void SwitchToCustom() { }
 
 
-    protected void StickToMouse() 
+    public void StickToMouse() 
     {
-    	Vector3 m = this._mouseController.GetMousePosition();
+    	Vector3 m = MouseController.GetMousePosition();
     	this.transform.position = new Vector3(m.x,this.transform.position.y,m.z);
     }
 
@@ -113,6 +114,16 @@ public class Building : MonoBehaviour {
     void OnTriggerExit(Collider other)
     {
         this._collidedObjects.Remove(other);
+    }
+
+    public void SetColor(Color color)
+    {
+        this._renderer.material.color = color;
+    }
+
+    public void ResetColor()
+    {
+        this._renderer.material.color = _originalColor;
     }
 }
 

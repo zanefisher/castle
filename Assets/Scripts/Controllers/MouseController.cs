@@ -3,7 +3,7 @@ using System.Collections;
 
 public class MouseController : MonoBehaviour {
 
-    public Vector3 mousePosition = Vector3.zero;
+    public static Vector3 mousePosition = Vector3.zero;
 
     private Ray _ray;
     private RaycastHit _hit = new RaycastHit();
@@ -20,14 +20,14 @@ public class MouseController : MonoBehaviour {
 
         if (Physics.Raycast(_ray, out _hit))
         {
-            this.mousePosition = _hit.point;
+            mousePosition = _hit.point;
         }
         
     }
 
-    public Vector3 GetMousePosition()
+    public static Vector3 GetMousePosition()
     {
-        return this.mousePosition;
+        return mousePosition;
     }
 
     public RaycastHit GetMouseHit()

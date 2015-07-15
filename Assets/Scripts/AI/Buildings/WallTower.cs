@@ -5,7 +5,6 @@ public class WallTower : Building {
 
     public Wall parent;
 
-
     public void SetParent(Wall p)
     {
         this.parent = p;
@@ -41,7 +40,6 @@ public class WallTower : Building {
     protected override void SwitchToIdle()
     {
         this.gameObject.layer = 0;
-        this._collider.isTrigger = false;
     }
 
     public WallTower GetCollidingTower()
@@ -56,4 +54,6 @@ public class WallTower : Building {
 
         return null;
     }
+
+
 }

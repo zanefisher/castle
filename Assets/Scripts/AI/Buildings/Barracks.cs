@@ -11,6 +11,10 @@ public class Barracks : Building {
 	protected override void OnPreBuild() {
 
         this.StickToMouse();
+        if (Input.GetMouseButtonDown(1))
+        {
+            this.SwitchToState(BuildingState.DESTROYING);
+        }
 
         if (this.IsBuildable())
         {

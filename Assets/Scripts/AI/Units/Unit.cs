@@ -16,6 +16,8 @@ public class Unit : MonoBehaviour {
 
     protected GameObject target;
 
+    public bool preSpawned = false;
+
     //GETTERS
     public GameObject GetTarget() { return this.target; }
     public UnitState  GetState()  { return this.state;  }
@@ -113,6 +115,8 @@ public class Unit : MonoBehaviour {
 
     protected virtual void SwitchToIdle()
     {
+        this.goal = INIT_GOAL;
+        this.agent.SetDestination(this.transform.position);
         this.agent.ResetPath();
     }
 
@@ -123,16 +127,20 @@ public class Unit : MonoBehaviour {
 
     protected virtual void SwitchToCustom()
     {
+        this.goal = INIT_GOAL;
+        this.agent.SetDestination(this.transform.position);
         this.agent.ResetPath();
     }
 
     protected virtual void SwitchToDestroying()
     {
+        this.goal = INIT_GOAL;
+        this.agent.SetDestination(this.transform.position);
         this.agent.ResetPath();
     }
+}
 
-    public enum UnitState
-    {
-        SPAWNING,IDLE,MOVING,DESTROYING,CUSTOM
-    }
+public enum UnitState
+{
+    SPAWNING, IDLE, MOVING, DESTROYING, CUSTOM
 }

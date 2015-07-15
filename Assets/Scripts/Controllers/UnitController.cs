@@ -4,33 +4,39 @@ using System.Collections.Generic;
 
 public class UnitController : MonoBehaviour {
 
-	public static List<GameObject> totalUnits = new List<GameObject>();
-	public static List<GameObject> idleUnits = new List<GameObject>();
-	public static List<GameObject> attackThrowingPrepUnits = new List<GameObject>();
-	public static List<GameObject> wallThrowingPrepUnits = new List<GameObject>();
+    public static int idleUnitCount = 0;
 
-	// Use this for initialization
-	void Start () {
-		totalUnits = new List<GameObject> ();
-		idleUnits = new List<GameObject> ();
-		attackThrowingPrepUnits = new List<GameObject> ();
-		wallThrowingPrepUnits = new List<GameObject> ();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		if(Input.GetKeyDown (KeyCode.Backspace) && totalUnits.Count > 0){
-			Debug.Log ("killing unit");
-			int randUnitNum = Random.Range (0, totalUnits.Count);
-			totalUnits[randUnitNum].GetComponent<unitScript>().DestroyUnit();
-		}
-	}
-
-    void OnTriggerEnter(Collider other)
+    void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.tag.Equals("FriendlyUnit"))
+        Unit m = other.GetComponent<Unit>();
+
+        if (m && m.GetState() != UnitState.SPAWNING)
         {
-            idleUnits.Add(other.gameObject);
+            idleUnitCount++;
+            m.SwitchToState(UnitState.DESTROYING);
         }
     }
+
+    //public static List<Unit> totalUnits = new List<Unit>();
+    //public static Queue<Unit> idleUnits = new Queue<Unit>();
+    //public static Queue<Unit> attackThrowingPrepUnits = new Queue<Unit>();
+    //public static Queue<Unit> wallThrowingPrepUnits = new Queue<Unit>();
+
+    //public void addIdleUnit(Unit m)
+    //{
+    //    if (!idleUnits.Contains(m) && !attackThrowingPrepUnits.Contains(m) && !wallThrowingPrepUnits.Contains(m))
+    //    {
+    //        idleUnits.Enqueue(m);
+    //    }
+    //}
+
+    //void OnTriggerEnter(Collider other)
+    //{
+    //    Unit m = other.GetComponent<Unit>();
+
+    //    if (m)
+    //    {
+    //        this.addIdleUnit(m);
+    //    }
+    //}
 }

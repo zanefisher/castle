@@ -6,14 +6,11 @@ public class BuildController : MonoBehaviour
 {
 
     private HandController _handController;
-    //private MouseController _mouseController;
     private UnitController _unitController;
-    private Vector3 _mousePosition;
-
-    public bool buildingWalls;
 
     public GameObject towerPrefab;
     public GameObject wallPrefab;
+    public GameObject unitPrefab;
 
     private BCState state;
 
@@ -25,7 +22,7 @@ public class BuildController : MonoBehaviour
 
     private float _distance;
     private bool _enoughUnits;
-    private float _unitsRequired;
+    private int _unitsRequired;
 
 
     //BUILDWALL VARS
@@ -39,7 +36,7 @@ public class BuildController : MonoBehaviour
     //public Transform gunObj;
     private GameObject prevWall;
     public LayerMask wallLayerMask;
-    public List<GameObject> wallSegmentList;
+    public Queue<WallChunk> wallSegmentQueue;
 
 
 
@@ -48,24 +45,14 @@ public class BuildController : MonoBehaviour
         _handController = GameObject.FindObjectOfType<HandController>().GetComponent<HandController>();
         //_mouseController = GameObject.FindObjectOfType<MouseController>().GetComponent<MouseController>();
         _unitController = GameObject.FindObjectOfType<UnitController>().GetComponent<UnitController>();
-        wallSegmentList = new List<GameObject>();
+        wallSegmentQueue = new Queue<WallChunk>();
     }
 
     void Update()
     {
-        GetMousePos();
         if (this.state != BCState.IDLE) HandleBuildingWalls();
     }
 
-    void GetMousePos()
-    {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hitDist;
-        if (Physics.Raycast(ray, out hitDist))
-        {
-            _mousePosition = new Vector3(hitDist.point.x, 0f, hitDist.point.z);
-        }
-    }
 
     void HandleBuildingWalls()
     {
@@ -90,7 +77,7 @@ public class BuildController : MonoBehaviour
             WallTower t = _startTower.GetCollidingTower();
             Debug.Log("Start Tower? : " + t);
             if (t) {
-                Destroy(_startTower);
+                Destroy(_startTower.gameObject);
                 _startTower = t; 
                 isNewStartTower = false; 
             }
@@ -110,7 +97,7 @@ public class BuildController : MonoBehaviour
                 WallTower t = _endTower.GetCollidingTower();
                 if (t)
                 {
-                    Destroy(_endTower);
+                    Destroy(_endTower.gameObject);
                     _endTower = t;
                     isNewEndTower = false;
                 }
@@ -133,10 +120,10 @@ public class BuildController : MonoBehaviour
             _newWall.transform.rotation = _startTower.transform.rotation;
             _newWall.transform.localScale = new Vector3(_newWall.transform.localScale.x, _newWall.transform.localScale.y, _distance);
 
-            _unitsRequired = _distance / stepSize;
+            _unitsRequired = (int) (_distance / stepSize) + 1;
 
 
-            if (_unitsRequired > UnitController.idleUnits.Count)
+            if (_unitsRequired > UnitController.idleUnitCount)
             {
                 _enoughUnits = false;
                 _newWall.SetColor(Color.red);
@@ -181,11 +168,15 @@ public class BuildController : MonoBehaviour
     private void SwitchToIdle() { }
     private void SwitchToDestroying()
     {
-        if (isNewStartTower) { Destroy(this._startTower);  }
+        Debug.Log("SwitchToDestroying()");
+        if (isNewStartTower) { _startTower.SwitchToState(BuildingState.DESTROYING); }
         else { _startTower.ResetColor(); }
 
-        if (isNewEndTower) { Destroy(this._endTower); }
+        if (isNewEndTower) { _endTower.SwitchToState(BuildingState.DESTROYING); }
         else { _endTower.ResetColor(); }
+
+        isNewStartTower = true;
+        isNewEndTower = true;
 
         Destroy(this._newWall);
         this.SwitchToState(BCState.IDLE);
@@ -193,12 +184,12 @@ public class BuildController : MonoBehaviour
 
     private void SwitchToStartTower() 
     {
-        _startTower = (Instantiate(towerPrefab, MouseController.GetMousePosition(), Quaternion.identity) as GameObject).GetComponent<WallTower>();
+        _startTower = (Instantiate(towerPrefab, MouseController.GetFlooredMousePosition(), Quaternion.identity) as GameObject).GetComponent<WallTower>();
     }
     private void SwitchToEndTower() 
     {
-        this._endTower = (Instantiate(towerPrefab, MouseController.GetMousePosition(), Quaternion.identity) as GameObject).GetComponent<WallTower>();
-        this._newWall = (Instantiate(wallPrefab, MouseController.GetMousePosition(), Quaternion.identity) as GameObject).GetComponent<WallChunk>();
+        this._endTower = (Instantiate(towerPrefab, MouseController.GetFlooredMousePosition(), Quaternion.identity) as GameObject).GetComponent<WallTower>();
+        this._newWall = (Instantiate(wallPrefab, MouseController.GetFlooredMousePosition(), Quaternion.identity) as GameObject).GetComponent<WallChunk>();
     }
     private void SwitchToBuilding() 
     {
@@ -207,17 +198,14 @@ public class BuildController : MonoBehaviour
         this._startTower.SwitchToState(BuildingState.IDLE);
         this._endTower.ResetColor();
         this._endTower.SwitchToState(BuildingState.IDLE);
-        for (int i = 0; i <= _unitsRequired; i++)
-        {
-            UnitController.wallThrowingPrepUnits.Add(UnitController.idleUnits[0]);
-            UnitController.idleUnits.Remove(UnitController.idleUnits[0]);
-        }
 
-        StartCoroutine(BuildWall(_startTower.gameObject, _endTower.gameObject));
+        UnitController.idleUnitCount -= _unitsRequired;
+
+        StartCoroutine(BuildWall(_startTower.gameObject, _endTower.gameObject,_unitsRequired));
         this.SwitchToState(BCState.IDLE);
     }
 
-    IEnumerator BuildWall(GameObject startTower, GameObject endTower)
+    IEnumerator BuildWall(GameObject startTower, GameObject endTower, int unitsRequired)
     {
 
         Wall newWall = (new GameObject()).AddComponent<Wall>();
@@ -234,9 +222,9 @@ public class BuildController : MonoBehaviour
         Vector3 currentBuildPos = startPos;
         Vector3 lastChunkPos = startPos;
 
-        wallSegments = Vector3.Distance(startPos, endPos) / stepSize;
+        wallSegments = (Vector3.Distance(startPos, endPos) / stepSize);
         int i = 0;
-        while (i <= wallSegments)
+        while (i < wallSegments)
         {
 
             Ray theRay;
@@ -245,21 +233,10 @@ public class BuildController : MonoBehaviour
 
             newWall.AddChunk(chunk.GetComponent<WallChunk>());
 
-            chunk.GetComponent<Renderer>().enabled = false;
-            chunk.GetComponent<BoxCollider>().enabled = false;
             if (Physics.Raycast(chunk.transform.position, Vector3.down, out rayHit, wallLayerMask) || Physics.Raycast(chunk.transform.position, Vector3.up, out rayHit, wallLayerMask))
             {
-                //if(rayHit.transform.gameObject.tag != "Tower"){
-
                 chunk.transform.position = new Vector3(rayHit.point.x, rayHit.point.y + wallOffsetHeight, rayHit.point.z);
-
                 chunk.transform.rotation = Quaternion.LookRotation((lastChunkPos - chunk.transform.position), rayHit.normal);
-                //}
-
-
-                //wall.GetComponent<BuildEffect>().Build(wallOffsetHeight);
-
-                //wall.transform.rotation=Quaternion.FromToRotation(Vector3.up, rayHit.normal);
             }
 
             Vector3 wallScale = chunk.transform.localScale;
@@ -275,13 +252,12 @@ public class BuildController : MonoBehaviour
             lastChunkPos = chunk.transform.position;
             prevWall = chunk;
 
-            wallSegmentList.Add(chunk);
+            wallSegmentQueue.Enqueue(chunk.GetComponent<WallChunk>());
             i++;
             yield return new WaitForSeconds(stepDelay);
         }
         prevWall = null;
-        _handController.ThrowUnitToWall(wallSegmentList);
-        //wallSegmentList.Clear ();
+        _handController.ThrowUnitsToWall(wallSegmentQueue);
         yield break;
     }
 

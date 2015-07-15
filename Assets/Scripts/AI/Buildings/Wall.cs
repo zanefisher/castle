@@ -27,13 +27,13 @@ public class Wall : MonoBehaviour {
         this.endTower = et;
         et.SetParent(this);
 
-        this.startTower.tag = "WallTower";
-        this.endTower.tag = "WallTower";
+        //this.startTower.tag = "WallTower";
+        //this.endTower.tag = "WallTower";
         
     }
 
     public void AddChunk(WallChunk chunk) {
-        chunk.tag = "WallChunk";
+        //chunk.tag = "WallChunk";
         chunks.Add(chunk);
         chunk.SetParent(this);
     }

@@ -3,18 +3,17 @@ using System.Collections;
 
 public class MouseController : MonoBehaviour {
 
-    public static Vector3 mousePosition = Vector3.zero;
-
-    private Ray _ray;
-    private RaycastHit _hit = new RaycastHit();
+    private static Vector3 mousePosition = Vector3.zero;
+    private static Ray _ray;
+    private static RaycastHit _hit = new RaycastHit();
 
 
     void Update()
     {
-        this.UpdateMousePosition();
+        UpdateMousePosition();
     }
 
-    private void UpdateMousePosition()
+    private static void UpdateMousePosition()
     {
         _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -29,10 +28,14 @@ public class MouseController : MonoBehaviour {
     {
         return mousePosition;
     }
-
-    public RaycastHit GetMouseHit()
+    public static Vector3 GetFlooredMousePosition()
     {
-        this.UpdateMousePosition();
-        return this._hit;
+        return new Vector3(mousePosition.x, 0, mousePosition.z);
+    }
+
+    public static RaycastHit GetMouseHit()
+    {
+        UpdateMousePosition();
+        return _hit;
     }
 }

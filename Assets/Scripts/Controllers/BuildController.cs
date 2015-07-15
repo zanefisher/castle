@@ -75,7 +75,6 @@ public class BuildController : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             WallTower t = _startTower.GetCollidingTower();
-            Debug.Log("Start Tower? : " + t);
             if (t) {
                 Destroy(_startTower.gameObject);
                 _startTower = t; 
@@ -168,15 +167,21 @@ public class BuildController : MonoBehaviour
     private void SwitchToIdle() { }
     private void SwitchToDestroying()
     {
-        Debug.Log("SwitchToDestroying()");
-        if (isNewStartTower) { _startTower.SwitchToState(BuildingState.DESTROYING); }
-        else { _startTower.ResetColor(); }
+        if (_startTower)
+        {
+            if (isNewStartTower) { _startTower.SwitchToState(BuildingState.DESTROYING); }
+            else { _startTower.ResetColor(); }
+            _startTower = null;
+            isNewStartTower = true;
+        }
 
-        if (isNewEndTower) { _endTower.SwitchToState(BuildingState.DESTROYING); }
-        else { _endTower.ResetColor(); }
-
-        isNewStartTower = true;
-        isNewEndTower = true;
+        if (_endTower)
+        {
+            if (isNewEndTower) { _endTower.SwitchToState(BuildingState.DESTROYING); }
+            else { _endTower.ResetColor(); }
+            _endTower = null;
+            isNewEndTower = true;
+        }
 
         Destroy(this._newWall);
         this.SwitchToState(BCState.IDLE);
@@ -208,10 +213,10 @@ public class BuildController : MonoBehaviour
     IEnumerator BuildWall(GameObject startTower, GameObject endTower, int unitsRequired)
     {
 
-        Wall newWall = (new GameObject()).AddComponent<Wall>();
-        newWall.name = "Wall";
+        //Wall newWall = (new GameObject()).AddComponent<Wall>();
+        //newWall.name = "Wall";
 
-        newWall.SetTowers(startTower.GetComponent<WallTower>(), endTower.GetComponent<WallTower>());
+        //newWall.SetTowers(startTower.GetComponent<WallTower>(), endTower.GetComponent<WallTower>());
 
 
         Vector3 startPos = startTower.transform.position;
@@ -231,7 +236,7 @@ public class BuildController : MonoBehaviour
             RaycastHit rayHit;
             GameObject chunk = Instantiate(wallChunk, currentBuildPos + Vector3.up * 5f, Quaternion.LookRotation(buildDirection)) as GameObject;
 
-            newWall.AddChunk(chunk.GetComponent<WallChunk>());
+            //newWall.AddChunk(chunk.GetComponent<WallChunk>());
 
             if (Physics.Raycast(chunk.transform.position, Vector3.down, out rayHit, wallLayerMask) || Physics.Raycast(chunk.transform.position, Vector3.up, out rayHit, wallLayerMask))
             {
@@ -257,7 +262,7 @@ public class BuildController : MonoBehaviour
             yield return new WaitForSeconds(stepDelay);
         }
         prevWall = null;
-        _handController.ThrowUnitsToWall(wallSegmentQueue);
+        _handController.ThrowUnitsToWall(wallSegmentQueue,((endPos+startPos)/2f));
         yield break;
     }
 

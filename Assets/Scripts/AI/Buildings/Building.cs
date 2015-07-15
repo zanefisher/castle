@@ -5,15 +5,18 @@ using System.Collections.Generic;
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(NavMeshObstacle))]
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Health))]
 
 public class Building : MonoBehaviour {
 
 	//CONTROLLERS
 	protected HandController _handController;
+    protected UnitController _unitController;
 	protected Renderer _renderer;
 	protected Color _originalColor;
     protected Collider _collider;
     protected List<Collider> _collidedObjects = new List<Collider>();
+    protected NavMeshObstacle _obstacle;
 
     public bool preBuilt = false;
 
@@ -29,8 +32,11 @@ public class Building : MonoBehaviour {
         this.id = _buildingID_++;
         this.state = BuildingState.PREBUILD;
         this._collider = this.GetComponent<Collider>();
+        this._obstacle = this.GetComponent<NavMeshObstacle>();
+        this._obstacle.enabled = false;
         this._collider.isTrigger = true;
         this._handController = GameObject.FindObjectOfType<HandController>().GetComponent<HandController>();
+        this._unitController = GameObject.FindObjectOfType<UnitController>().GetComponent<UnitController>();
         this._renderer = this.GetComponent<MeshRenderer>();
         this._originalColor = this._renderer.material.color;
         if (this.preBuilt) this.SwitchToState(BuildingState.BUILDING);
@@ -59,6 +65,11 @@ public class Building : MonoBehaviour {
 		}
 	}
 
+    public BuildingState GetState()
+    {
+        return this.state;
+    }
+
 	protected virtual void OnPreBuild() {}
     protected virtual void OnBuild() {}
     protected virtual void OnIdle() {}
@@ -86,7 +97,10 @@ public class Building : MonoBehaviour {
     }
 
     protected virtual void SwitchToBuilding() { }
-    protected virtual void SwitchToIdle() { }
+    protected virtual void SwitchToIdle() 
+    {
+        //this._obstacle.enabled = true;
+    }
     protected virtual void SwitchToDestroying() 
     {
         Destroy(this.gameObject);

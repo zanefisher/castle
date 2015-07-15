@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class Health : MonoBehaviour {
 
     protected static List<string> _damageTypes = new List<string>() { "normal", "fire", "explode" };
-    protected int health;
+    public int health;
 
     public virtual void dealDamage(int amount, string type)
     {

@@ -44,7 +44,8 @@ public class HandHunter : Unit {
 
 	void OnTriggerEnter(Collider other) 
 	{
-		if (other.gameObject.tag.Equals("Hand") || other.gameObject.tag.Equals("Wall"))
+        Building b = other.gameObject.GetComponent<Building>();
+        if (b && b.GetState() != BuildingState.PREBUILD)
         {
             other.gameObject.GetComponent<Health>().dealDamage(this.damage, "explode");
             this.SwitchToState(UnitState.DESTROYING);

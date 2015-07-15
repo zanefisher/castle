@@ -10,11 +10,11 @@ public class DemonLemming : Unit {
         base.Update();
         if (this.state == UnitState.IDLE)
         {
-            GameObject w = this.FindValidWall();
+            WallChunk w = this.FindValidWall();
 
             if (w != null)
             {
-                this.target = w;
+                this.target = w.gameObject;
                 this.SetGoal(w.transform.position);
                 this.SwitchToState(UnitState.MOVING);
             }
@@ -24,15 +24,14 @@ public class DemonLemming : Unit {
     //OVERRIDES
     protected override void OnSpawn()
     {
-        Debug.Log("OnSpawn");
         if (this.goal.Equals(INIT_GOAL)) 
         {
 
-            GameObject w = this.FindValidWall();
+            WallChunk w = this.FindValidWall();
 
             if (w != null)
             {
-                this.target = w;
+                this.target = w.gameObject;
                 this.SetGoal(w.transform.position);
                 this.SwitchToState(UnitState.MOVING);
             } 
@@ -51,7 +50,7 @@ public class DemonLemming : Unit {
     {
         if (target == null)
         {
-            GameObject w = this.FindValidWall();
+            WallChunk w = this.FindValidWall();
             if (w == null)
             {
                 this.SetGoal(INIT_GOAL);
@@ -59,7 +58,7 @@ public class DemonLemming : Unit {
             }
             else
             {
-                this.target = w;
+                this.target = w.gameObject;
                 this.SetGoal(w.transform.position);
                 this.SwitchToState(UnitState.MOVING);
             }
@@ -68,24 +67,22 @@ public class DemonLemming : Unit {
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag.Equals("WallChunk"))
-        {
-            other.gameObject.GetComponent<WallChunk>().dealDamage(this.damage, "explode");
-            this.SwitchToState(UnitState.DESTROYING);
-        }
+        Debug.Log("OnTriggerEnter- DemonLemming");
 
-        if (other.gameObject.tag.Equals("WallTower"))
+        Building b = other.gameObject.GetComponent<Building>();
+        if (b && b.GetState() != BuildingState.PREBUILD)
         {
-            other.gameObject.GetComponent<WallTower>().dealDamage(this.damage, "explode");
+            Debug.Log("OnTriggerEnter - Demon Lemming - Collided with Building");
+            other.gameObject.GetComponent<Health>().dealDamage(this.damage, "explode");
             this.SwitchToState(UnitState.DESTROYING);
         }
     }
 
 
-    protected GameObject FindValidWall()
+    protected WallChunk FindValidWall()
     {
-        GameObject wall = null;
-        GameObject[] walls = GameObject.FindGameObjectsWithTag("WallChunk");
+        WallChunk wall = null;
+        WallChunk[] walls = GameObject.FindObjectsOfType<WallChunk>();
 
         float min = float.MaxValue;
 

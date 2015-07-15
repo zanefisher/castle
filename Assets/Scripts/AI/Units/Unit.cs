@@ -7,6 +7,8 @@ public class Unit : MonoBehaviour {
 
     protected static int _unitID_ = 0;
     protected readonly static Vector3 INIT_GOAL = new Vector3(0, -1000f, 0);
+    
+    protected UnitController _unitController;
 
     private int id = 0;
     public NavMeshAgent agent;
@@ -31,6 +33,7 @@ public class Unit : MonoBehaviour {
     {
         this.id = _unitID_++;
         this.agent = GetComponent<NavMeshAgent>();
+        this._unitController = GameObject.FindObjectOfType<UnitController>().GetComponent<UnitController>();
         this.state = UnitState.SPAWNING;
     }
 

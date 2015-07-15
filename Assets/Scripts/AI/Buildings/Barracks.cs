@@ -64,10 +64,10 @@ public class Barracks : Building {
         GameObject newUnit = Instantiate(unitPrefab, this.transform.position, Quaternion.identity) as GameObject;
         Unit u = newUnit.GetComponent<Unit>();
 
-        Vector3 goal = _handController.transform.position;
-        Vector2 iuc = Random.insideUnitCircle * _handController.grabRange;
+        //Vector3 goal = _unitController.transform.position;
+        //Vector2 iuc = Random.insideUnitCircle * _handController.grabRange;
 
-        goal += new Vector3(iuc.x, 0, iuc.y);
-        u.SetGoal(goal);
+        //goal += new Vector3(iuc.x, 0, iuc.y);
+        //u.SetGoal(goal);
     }
 }

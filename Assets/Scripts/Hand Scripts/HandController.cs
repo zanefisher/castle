@@ -5,51 +5,46 @@ using System.Collections.Generic;
 public class HandController : MonoBehaviour {
 
     private BuildController _buildController;
-    public float grabRange = 5f;
+    public GameObject ballPrefab;
 
     void Start()
     {
         _buildController = GameObject.FindObjectOfType<BuildController>().GetComponent<BuildController>();
     }
 
-    public void ThrowUnitsToWall(Queue<WallChunk> wallSegments)
+    public void ThrowUnitsToWall(Queue<WallChunk> wallSegments,Vector3 midpoint)
     {
-        StartCoroutine(ThrowToWall(wallSegments));
+        StartCoroutine(ThrowToWall(wallSegments,midpoint));
     }
 
-    IEnumerator ThrowToWall(Queue<WallChunk> segments)
+    IEnumerator ThrowToWall(Queue<WallChunk> segments,Vector3 midpoint)
     {
         int i = 0;
         int f = segments.Count;
 
-        while (i < f) 
+        GameObject ball = (Instantiate(ballPrefab, _buildController.transform.position, Quaternion.identity) as GameObject);
+
+        Vector3 target = midpoint;
+        Vector3 midPoint = (((target - transform.position) * 0.5f) + transform.position) + Vector3.up * 5f;
+        Vector3[] throwPath = new Vector3[] { transform.position, midPoint, target };
+
+        Hashtable newWallUnitHash = iTween.Hash("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad, "oncomplete", "TurnUnitIntoWall", "onCompleteTarget", gameObject, "onCompleteParams", segments);
+        StartCoroutine(ThrowUnitToWallCoroutine(ball, newWallUnitHash));
+        yield return null;
+    }
+
+    IEnumerator ThrowUnitToWallCoroutine(GameObject ball, Hashtable unitHash)
+    {
+        iTween.MoveTo(ball, unitHash);
+        yield return null;
+    }
+
+    void TurnUnitIntoWall(Queue<WallChunk> segments)
+    {
+        while (segments.Count > 0)
         {
-            Unit newWallUnit = (Instantiate(_buildController.unitPrefab, _buildController.transform.position, Quaternion.identity) as GameObject).GetComponent<Unit>();
             WallChunk chunk = segments.Dequeue();
-
-            Vector3 target = chunk.transform.position;
-            Vector3 midPoint = (((target - transform.position) * 0.5f) + transform.position) + Vector3.up * 5f;
-            Vector3[] throwPath = new Vector3[] { transform.position, midPoint, target };
-            chunk.SetThrownMinion(newWallUnit.GetComponent<Minion>());
-
-            Hashtable newWallUnitHash = iTween.Hash("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad, "oncomplete", "TurnUnitIntoWall", "onCompleteTarget", gameObject, "onCompleteParams", chunk);
-            StartCoroutine(ThrowUnitToWallCoroutine(newWallUnit, newWallUnitHash));
-
-            i++;
-            yield return new WaitForSeconds(0.2f);
+            chunk.SwitchToState(BuildingState.BUILDING);
         }
-        yield return null;
-    }
-
-    IEnumerator ThrowUnitToWallCoroutine(Unit unitToThrow, Hashtable unitHash)
-    {
-        iTween.MoveTo(unitToThrow.gameObject, unitHash);
-        yield return null;
-    }
-
-    void TurnUnitIntoWall(WallChunk chunk)
-    {
-        chunk.thrownMinion.SwitchToState(UnitState.DESTROYING);
-        chunk.SwitchToState(BuildingState.BUILDING);
     }
 }

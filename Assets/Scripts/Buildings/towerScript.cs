@@ -10,15 +10,15 @@ public class towerScript : MonoBehaviour {
 	}
 
 	void OnMouseOver(){
-		buildController.connectingTowers = true;
-		buildController.targetTower = gameObject;
-		if(Input.GetMouseButtonDown (1)){
-			Destroy (gameObject);
-		}
+        //buildController.connectingTowers = true;
+        //buildController.targetTower = gameObject;
+        //if(Input.GetMouseButtonDown (1)){
+        //    Destroy (gameObject);
+        //}
 	}
 
 	void OnMouseExit(){
-		buildController.connectingTowers = false;
+		//buildController.connectingTowers = false;
 	}
 
 }

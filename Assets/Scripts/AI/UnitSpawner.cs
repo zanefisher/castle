@@ -26,6 +26,6 @@ public class UnitSpawner : MonoBehaviour {
 
     private Unit SpawnUnit(GameObject prefab)
     {
-        return ((GameObject)GameObject.Instantiate(prefab)).GetComponent<Unit>();
+        return ((GameObject)GameObject.Instantiate(prefab,this.transform.position,Quaternion.identity)).GetComponent<Unit>();
     }
 }

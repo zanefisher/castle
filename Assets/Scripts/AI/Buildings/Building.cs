@@ -115,7 +115,6 @@ public class Building : MonoBehaviour {
     }
 	
 	public void Repair(){
-		Debug.Log ("repairing wall chunk");
 		this.gameObject.layer = 2;
 		_handController.ThrowUnitToRepair (this.gameObject);
 		//this.GetComponent<Health>().health = 10;

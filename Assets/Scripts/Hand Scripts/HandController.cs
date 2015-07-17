@@ -74,7 +74,7 @@ public class HandController : MonoBehaviour {
 		GameObject targetObj = objs[0];
 		GameObject thrownUnit = objs[1];
 		targetObj.GetComponent<Building>().SwitchToState (BuildingState.BUILDING);
-		targetObj.GetComponent<Health>().health = 10;
+		targetObj.GetComponent<Health>().health = targetObj.GetComponent<Health>()._originalHealth;
 		Destroy (thrownUnit);
 	}
 }

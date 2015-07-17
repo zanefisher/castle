@@ -6,6 +6,11 @@ public class Health : MonoBehaviour {
 
     protected static List<string> _damageTypes = new List<string>() { "normal", "fire", "explode" };
     public int health;
+	public int _originalHealth;
+
+	void Start(){
+		_originalHealth = health;
+	}
 
     public virtual void dealDamage(int amount, string type)
     {

@@ -47,4 +47,34 @@ public class HandController : MonoBehaviour {
             chunk.SwitchToState(BuildingState.BUILDING);
         }
     }
+
+	public void ThrowUnitToRepair(GameObject targetObj)
+	{
+		GameObject newUnit = (Instantiate(ballPrefab, _buildController.transform.position, Quaternion.identity) as GameObject);
+
+		Vector3 target = targetObj.transform.position;
+		Vector3 midPoint = (((target - transform.position) * 0.5f) + transform.position) + Vector3.up * 5f;
+		Vector3[] throwPath = new Vector3[] { transform.position, midPoint, target };
+
+		GameObject[] onCompleteParams = new GameObject[]{null, null};
+		onCompleteParams[0] = targetObj;
+		onCompleteParams[1] = newUnit;
+
+		Hashtable throwHash = iTween.Hash ("path", throwPath, "speed", 10f, "easetype", iTween.EaseType.easeInQuad, "oncomplete", "RepairWall", "onCompleteTarget", gameObject, "onCompleteParams", onCompleteParams);
+		StartCoroutine (ThrowUnitToRepairCoroutine (newUnit, throwHash));
+	}
+
+	IEnumerator ThrowUnitToRepairCoroutine (GameObject unit, Hashtable unitHash)
+	{
+		iTween.MoveTo (unit, unitHash);
+		yield return null;
+	}
+
+	void RepairWall(GameObject[] objs){
+		GameObject targetObj = objs[0];
+		GameObject thrownUnit = objs[1];
+		targetObj.GetComponent<Building>().SwitchToState (BuildingState.BUILDING);
+		targetObj.GetComponent<Health>().health = 10;
+		Destroy (thrownUnit);
+	}
 }

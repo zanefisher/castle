@@ -113,6 +113,14 @@ public class Building : MonoBehaviour {
     	Vector3 m = MouseController.GetMousePosition();
     	this.transform.position = new Vector3(m.x,this.transform.position.y,m.z);
     }
+	
+	public void Repair(){
+		Debug.Log ("repairing wall chunk");
+		this.gameObject.layer = 2;
+		_handController.ThrowUnitToRepair (this.gameObject);
+		//this.GetComponent<Health>().health = 10;
+		//this.SwitchToState (BuildingState.BUILDING);
+	}
 
     protected virtual bool IsBuildable() 
     {

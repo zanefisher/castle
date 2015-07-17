@@ -14,12 +14,14 @@ public class Health : MonoBehaviour {
 
     protected virtual void OnDamage(int amount, string type)
     {
+		//Change this to switch the wall to a damaged state? Different color + selectable for repairs? Or do we just wait until the wall is destroyed?
         this.health -= amount;
         if (this.health <= 0) { this.OnDestroy(); }
     }
 
     protected virtual void OnDestroy()
-    {
-        Destroy(this.gameObject);
+    {	
+		this.GetComponent<Building>().SwitchToState(BuildingState.DESTROYING);
+        //Destroy(this.gameObject);
     }
 }

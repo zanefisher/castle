@@ -99,7 +99,7 @@ public class Building : MonoBehaviour {
     protected virtual void SwitchToBuilding() { }
     protected virtual void SwitchToIdle() 
     {
-        //this._obstacle.enabled = true;
+        this._obstacle.enabled = true;
     }
     protected virtual void SwitchToDestroying() 
     {

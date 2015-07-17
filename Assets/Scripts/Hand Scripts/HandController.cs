@@ -56,11 +56,8 @@ public class HandController : MonoBehaviour {
 		Vector3 midPoint = (((target - transform.position) * 0.5f) + transform.position) + Vector3.up * 5f;
 		Vector3[] throwPath = new Vector3[] { transform.position, midPoint, target };
 
-		GameObject[] onCompleteParams = new GameObject[]{null, null};
-		onCompleteParams[0] = targetObj;
-		onCompleteParams[1] = newUnit;
-
-		Hashtable throwHash = iTween.Hash ("path", throwPath, "speed", 10f, "easetype", iTween.EaseType.easeInQuad, "oncomplete", "RepairWall", "onCompleteTarget", gameObject, "onCompleteParams", onCompleteParams);
+		GameObject[] onCompleteParams = new GameObject[]{targetObj, newUnit};
+		Hashtable throwHash = iTween.Hash ("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad, "oncomplete", "RepairWall", "onCompleteTarget", gameObject, "onCompleteParams", onCompleteParams);
 		StartCoroutine (ThrowUnitToRepairCoroutine (newUnit, throwHash));
 	}
 

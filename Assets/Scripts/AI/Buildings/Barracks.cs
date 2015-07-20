@@ -5,6 +5,7 @@ using System.Collections;
 public class Barracks : Building {
 
     public GameObject unitPrefab;
+    public GameObject enemyPrefab;
     public float spawnFrequency = 5f;
     private float _timer = 0f;
        
@@ -34,19 +35,30 @@ public class Barracks : Building {
     }
 
     protected override void OnBuild()
-    {  
+    {
         this.SwitchToState(BuildingState.IDLE);
     }
 
     protected override void OnIdle()
     {
+        
+
         if (_timer < spawnFrequency)
         {
             _timer += Time.deltaTime;
         }
         else
         {
-            this.SpawnUnit();
+            if (this.checkSurroundedByWall(30, 50)) this.convertToFriendly();
+
+            if (this.converted)
+            {
+                this.SpawnUnit();
+            }
+            else
+            {
+                this.SpawnEnemy();
+            }
             _timer = 0f;
         }
     }
@@ -69,5 +81,10 @@ public class Barracks : Building {
 
         //goal += new Vector3(iuc.x, 0, iuc.y);
         //u.SetGoal(goal);
+    }
+
+    protected void SpawnEnemy()
+    {
+        GameObject newEnemy = Instantiate(enemyPrefab, this.transform.position, Quaternion.identity) as GameObject;
     }
 }

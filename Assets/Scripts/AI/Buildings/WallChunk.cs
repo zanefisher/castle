@@ -8,6 +8,7 @@ public class WallChunk : Building {
 
     public Minion thrownMinion;
 
+
     public void SetParent(Wall p)
     {
         this.parent = p;
@@ -19,14 +20,21 @@ public class WallChunk : Building {
         this._renderer.material.color = Color.blue;
     }
 
+	protected override void SwitchToDestroying(){
+		//Insert Destruction animation
+		//Change wall chunk model to "Destroyed" model
+		this._renderer.material.color = Color.green;
+	}
+
     protected override void OnDestroy()
-    {
-        Destroy(this.gameObject);
+	{
+
     }
 
     protected override void SwitchToBuilding()
     {
         this._renderer.material.color = this._originalColor;
+        this.gameObject.layer = 0;
         this.SwitchToState(BuildingState.IDLE); //SKIPS IDLE FOR NOW. ONBUILD USED FOR ANIMATIONS
     }
 

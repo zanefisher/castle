@@ -198,7 +198,7 @@ public class BuildController : MonoBehaviour
     }
     private void SwitchToBuilding() 
     {
-        Destroy(_newWall);
+        Destroy(_newWall.gameObject);
         this._startTower.ResetColor();
         this._startTower.SwitchToState(BuildingState.IDLE);
         this._endTower.ResetColor();

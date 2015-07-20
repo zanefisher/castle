@@ -19,6 +19,7 @@ public class Building : MonoBehaviour {
     protected NavMeshObstacle _obstacle;
 
     public bool preBuilt = false;
+    public bool converted = false;
 
     protected static int _buildingID_ = 0;
 
@@ -113,6 +114,13 @@ public class Building : MonoBehaviour {
     	Vector3 m = MouseController.GetMousePosition();
     	this.transform.position = new Vector3(m.x,this.transform.position.y,m.z);
     }
+	
+	public void Repair(){
+		this.gameObject.layer = 2;
+		_handController.ThrowUnitToRepair (this.gameObject);
+		//this.GetComponent<Health>().health = 10;
+		//this.SwitchToState (BuildingState.BUILDING);
+	}
 
     protected virtual bool IsBuildable() 
     {
@@ -142,6 +150,44 @@ public class Building : MonoBehaviour {
     public void ResetColor()
     {
         this._renderer.material.color = _originalColor;
+    }
+
+    public virtual void convertToFriendly()
+    {
+        if (!converted) converted = !converted;
+        this.tag = "Building";
+    }
+
+    public bool checkSurroundedByWall(int angle, float range)
+    {
+        int startangle = 0;
+
+        RaycastHit[] hits;
+        bool found;
+
+        while (startangle <= 360)
+        {
+            found = false;
+            hits = Physics.RaycastAll(this.transform.position, Quaternion.Euler(0, startangle, 0) * transform.forward, range);
+
+            for (int i = 0; i < hits.Length; i++)
+            {
+                if (hits[i].collider.GetComponent<WallChunk>())
+                {
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                return false;
+            }
+
+            startangle += angle;
+        }
+
+
+        return true;
     }
 }
 

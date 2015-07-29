@@ -32,10 +32,11 @@ public class wallButton : MonoBehaviour {
 		spawnPos = new Vector3 (targetPoint.x, 0f, targetPoint.z);
 		//GameObject newWall = Instantiate (wallPrefab, spawnPos, Quaternion.identity) as GameObject;
 		//buildController.newWall = newWall;
-		GameObject newStartTower = Instantiate (smallTowerPrefab, spawnPos, Quaternion.identity) as GameObject;
-		buildController.startTower = newStartTower;
+		//GameObject newStartTower = Instantiate (smallTowerPrefab, spawnPos, Quaternion.identity) as GameObject;
+		//buildController.startTower = newStartTower;
 		//GameObject newEndTower = Instantiate (smallTowerPrefab, spawnPos, Quaternion.identity) as GameObject;
 		//buildController.endTower = newEndTower;
-		buildController.Invoke ("BuildingWallsTrue", 0.1f);
+		//buildController.Invoke ("BuildingWallsTrue", 0.1f);
+        buildController.SwitchToState(BuildController.BCState.STARTTOWER);
 	}
 }

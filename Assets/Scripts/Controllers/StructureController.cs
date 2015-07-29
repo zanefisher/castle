@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿//using UnityEngine;
+//using System.Collections;
 
-public class StructureController : MonoBehaviour {
+//public class StructureController : MonoBehaviour {
 
-	public static selectableStructure selectedStructure;
-}
+//    public static selectableStructure selectedStructure;
+//}

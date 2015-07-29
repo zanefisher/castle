@@ -4,84 +4,74 @@ using System.Collections.Generic;
 
 public class HandController : MonoBehaviour {
 
-	BuildController buildController;
+    private BuildController _buildController;
+    public GameObject ballPrefab;
 
-	void Start(){
-		buildController = GameObject.Find ("BuildController").GetComponent<BuildController>();
+    void Start()
+    {
+        _buildController = GameObject.FindObjectOfType<BuildController>().GetComponent<BuildController>();
+    }
+
+    public void ThrowUnitsToWall(Queue<WallChunk> wallSegments,Vector3 midpoint)
+    {
+        StartCoroutine(ThrowToWall(wallSegments,midpoint));
+    }
+
+    IEnumerator ThrowToWall(Queue<WallChunk> segments,Vector3 midpoint)
+    {
+        int i = 0;
+        int f = segments.Count;
+
+        GameObject ball = (Instantiate(ballPrefab, _buildController.transform.position, Quaternion.identity) as GameObject);
+
+        Vector3 target = midpoint;
+        Vector3 midPoint = (((target - transform.position) * 0.5f) + transform.position) + Vector3.up * 5f;
+        Vector3[] throwPath = new Vector3[] { transform.position, midPoint, target };
+
+        Hashtable newWallUnitHash = iTween.Hash("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad, "oncomplete", "TurnUnitIntoWall", "onCompleteTarget", gameObject, "onCompleteParams", segments);
+        StartCoroutine(ThrowUnitToWallCoroutine(ball, newWallUnitHash));
+        yield return null;
+    }
+
+    IEnumerator ThrowUnitToWallCoroutine(GameObject ball, Hashtable unitHash)
+    {
+        iTween.MoveTo(ball, unitHash);
+        yield return null;
+    }
+
+    void TurnUnitIntoWall(Queue<WallChunk> segments)
+    {
+        while (segments.Count > 0)
+        {
+            WallChunk chunk = segments.Dequeue();
+            chunk.SwitchToState(BuildingState.BUILDING);
+        }
+    }
+
+	public void ThrowUnitToRepair(GameObject targetObj)
+	{
+		GameObject newUnit = (Instantiate(ballPrefab, _buildController.transform.position, Quaternion.identity) as GameObject);
+
+		Vector3 target = targetObj.transform.position;
+		Vector3 midPoint = (((target - transform.position) * 0.5f) + transform.position) + Vector3.up * 5f;
+		Vector3[] throwPath = new Vector3[] { transform.position, midPoint, target };
+
+		GameObject[] onCompleteParams = new GameObject[]{targetObj, newUnit};
+		Hashtable throwHash = iTween.Hash ("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad, "oncomplete", "RepairWall", "onCompleteTarget", gameObject, "onCompleteParams", onCompleteParams);
+		StartCoroutine (ThrowUnitToRepairCoroutine (newUnit, throwHash));
 	}
 
-	//STRICTLY FOR TESTING THE UNIT THROWING IN THE UITESTING SCENE
-	public GameObject unitPrefab;
-	void Update(){
-		if (Input.GetKeyDown (KeyCode.I)) {
-			GameObject newUnit = Instantiate (unitPrefab, new Vector3(Random.Range (-2f,2f), 0f, Random.Range(-2f,2f)), Quaternion.identity) as GameObject;
-		}
-	}
-
-	public void ThrowUnitToEnemy(Vector3 target){
-		for (int i = 0; i < UnitController.attackThrowingPrepUnits.Count; i++) {
-			GameObject newAttackingUnit = UnitController.attackThrowingPrepUnits [i];
-			Vector3 midPoint = (((target - transform.position) * 0.5f) + transform.position) + Vector3.up * 5f;
-			Vector3[] throwPath = new Vector3[]{Vector3.zero,Vector3.zero,Vector3.zero};
-			throwPath [0] = transform.position;
-			throwPath [1] = midPoint;
-			throwPath [2] = target;
-			iTween.MoveTo (newAttackingUnit, iTween.Hash ("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad)); 
-		}
-		UnitController.attackThrowingPrepUnits.Clear ();
-	}
-
-	int curThrownUnits;
-	int maxThrownUnits;
-	public void ThrowUnitToWall(List<GameObject> wallSegmentsList){
-		/*for (int i = 1; i < wallSegmentsList.Count - 1; i++){
-			GameObject newWallUnit = UnitController.idleUnits [0];
-			UnitController.idleUnits.Remove (newWallUnit);
-			Vector3 target = wallSegmentsList[i].transform.position;
-			Vector3 midPoint = (((target - transform.position) * 0.5f) + transform.position) + Vector3.up * 5f;
-			Vector3[] throwPath = new Vector3[]{Vector3.zero,Vector3.zero,Vector3.zero};
-			throwPath[0] = transform.position;
-			throwPath[1] = midPoint;
-			throwPath[2] = target;
-			//iTween.MoveTo (newWallUnit, iTween.Hash ("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad, "oncomplete", "TurnUnitIntoWall", "onCompleteTarget", gameObject, "oncompleteparams", buildController.wallSegmentList[i]));
-			Hashtable newWallUnitHash = iTween.Hash ("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad, "oncomplete", "TurnUnitIntoWall", "onCompleteTarget", gameObject, "oncompleteparams", wallSegmentsList[i]);
-			StartCoroutine (ThrowUnitToWallCoroutine (newWallUnit, newWallUnitHash));
-		}*/
-
-		//Using this throws them with a delay that's set in the coroutine. If you want them to all throw at once, comment this out and uncomment the stuff above
-		StartCoroutine (ThrowToWall (wallSegmentsList));
-	}
-
-	IEnumerator ThrowToWall(List<GameObject> segments){
-		int i = 0;
-		int max = segments.Count;
-		//I'm not sure if this has cases where it can create an infinite loop
-		while(i < max){
-			GameObject newWallUnit = UnitController.wallThrowingPrepUnits [0];
-			UnitController.wallThrowingPrepUnits.Remove (newWallUnit);
-			Vector3 target = segments[0].transform.position;
-			Vector3 midPoint = (((target - transform.position) * 0.5f) + transform.position) + Vector3.up * 5f;
-			Vector3[] throwPath = new Vector3[]{Vector3.zero,Vector3.zero,Vector3.zero};
-			throwPath[0] = transform.position;
-			throwPath[1] = midPoint;
-			throwPath[2] = target;
-			//iTween.MoveTo (newWallUnit, iTween.Hash ("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad, "oncomplete", "TurnUnitIntoWall", "onCompleteTarget", gameObject, "oncompleteparams", buildController.wallSegmentList[i]));
-			Hashtable newWallUnitHash = iTween.Hash ("path", throwPath, "time", 2f, "easetype", iTween.EaseType.easeInQuad, "oncomplete", "TurnUnitIntoWall", "onCompleteTarget", gameObject, "oncompleteparams", segments[0]);
-			StartCoroutine (ThrowUnitToWallCoroutine (newWallUnit, newWallUnitHash));
-			buildController.wallSegmentList.Remove(buildController.wallSegmentList[0]);
-			i++;
-			yield return new WaitForSeconds(0.2f);
-		}
-	}
-	
-
-	IEnumerator ThrowUnitToWallCoroutine(GameObject unitToThrow, Hashtable unitHash){
-		iTween.MoveTo (unitToThrow, unitHash);
+	IEnumerator ThrowUnitToRepairCoroutine (GameObject unit, Hashtable unitHash)
+	{
+		iTween.MoveTo (unit, unitHash);
 		yield return null;
 	}
 
-	void TurnUnitIntoWall(GameObject wallSegment){
-		wallSegment.GetComponent<Renderer>().enabled = true;
-		wallSegment.GetComponent<BoxCollider>().enabled = true;
+	void RepairWall(GameObject[] objs){
+		GameObject targetObj = objs[0];
+		GameObject thrownUnit = objs[1];
+		targetObj.GetComponent<Building>().SwitchToState (BuildingState.BUILDING);
+		targetObj.GetComponent<Health>().health = targetObj.GetComponent<Health>()._originalHealth;
+		Destroy (thrownUnit);
 	}
 }
